@@ -1,2 +1,2 @@
 # mylog00.github.io
-Personal web page
+Simple AngularJS app [mylog00.github.io](mylog00.github.io)
