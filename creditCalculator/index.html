@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Credit Calculator</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+    <!-- jQuery -->
+    <!-- <script src="//code.jquery.com/jquery.js"></script> -->
+    <!-- Bootstrap JavaScript -->
+    <!-- <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.js"></script> -->
+    <script src="calc.js"></script>
+</head>
+<body>
+<div class="row container">
+    <div class="col-md-6">
+        <strong>Enter Loan Data:</strong>
+
+        <form class="form-horizontal">
+            <!-- Amount -->
+            <div class="form-group">
+                <label for='amount' class="control-label col-md-7">Amount of the loan ($):</label>
+                <div class="col-md-5">
+                    <input type="number" class="form-control" id='amount' onchange="calculate();" placeholder="Amount">
+                </div>
+            </div>
+            <!-- Persents -->
+            <div class="form-group">
+                <label for='apr' class="control-label col-md-7">Annual interest (%):</label>
+                <div class="col-md-5">
+                    <input type="number" class="form-control" id='apr' onchange="calculate();" placeholder="Persents">
+                </div>
+            </div>
+            <!-- Years -->
+            <div class="form-group">
+                <label for='years' class="control-label col-md-7">Repayment period (years):</label>
+                <div class="col-md-5">
+                    <input class="form-control" id='years' onchange="calculate();" placeholder="Years">
+                </div>
+            </div>
+            <!-- Zipcode -->
+            <div class="form-group">
+                <label for='zipcode' class="control-label col-md-7">Zipcode (to find lenders):</label>
+                <div class="col-md-5">
+                    <input class="form-control" id='zipcode' onchange="calculate();" placeholder="Zipcode">
+                </div>
+            </div>
+            <!-- Calculate -->
+            <div class="form-group">
+                <label for='proc' class="control-label col-md-7">Approximate Payments:</label>
+                <div class="col-md-5">
+                    <button class="btn btn-primary form-control" id='proc' onclick="calculate();" type="button">
+                        Calculate
+                    </button>
+                </div>
+            </div>
+            <!-- Result -->
+            <div class="form-group">
+                <label for='payment' class="control-label col-md-7">Monthly payments:</label>
+                <div class="col-md-5">
+                    $<span id='payment' class="output"></span>
+                </div>
+            </div>
+            <!-- Total -->
+            <div class="form-group">
+                <label for='total' class="control-label col-md-7">Total payments:</label>
+                <div class="col-md-5">
+                    $<span id='total' class="output"></span>
+                </div>
+            </div>
+            <!-- Total interest -->
+            <div class="form-group">
+                <label for='totalinterest' class="control-label col-md-7">Total interest:</label>
+                <div class="col-md-5">
+                    $<span id='totalinterest' class="output"></span>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-6">
+        <strong>Graph</strong>
+        <canvas id='graph' width='400' height='250'></canvas>
+    </div>
+</div>
+</body>
+</html>

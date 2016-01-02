@@ -1,0 +1,19 @@
+.output {
+    font-weight: bold;
+}
+
+.bordered {
+    border: solid black 1px;
+}
+
+.form-horizontal .control-label {
+    text-align: left;
+}
+
+#graph {
+    border: solid black 1px;
+}
+
+#payment {
+    text-decoration: underline;
+}
