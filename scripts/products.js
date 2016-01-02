@@ -27,7 +27,7 @@
         restrict: "E",
         templateUrl: "/partial/product-tabs.html",
         controller: function() {
-          this.tab = 1;
+          this.tab = 3;
 
           this.isSet = function(checkTab) {
             return this.tab === checkTab;
