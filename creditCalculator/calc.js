@@ -50,7 +50,6 @@ function calculate() {
         totalinterest.innerHTML = '';
         chart();
     }
-    return true;
 }
 
 //Save data to local storage
