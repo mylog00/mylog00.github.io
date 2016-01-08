@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple calculator</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css" rel="stylesheet">
+    <!--<link href="style.css" rel="stylesheet">-->
+    <!-- jQuery -->
+    <!-- <script src="//code.jquery.com/jquery.js"></script> -->
+    <!-- Bootstrap JavaScript -->
+    <!-- <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.js"></script> -->
+    <script src="./calc.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <input id="formula" title="Calculate">
+        <button class="btn btn-primary" type="button" id="calc" onclick="calculate();">Calculate</button>
+    </div>
+    <div class="row">
+        RPN:<span id='rpn'></span>
+    </div>
+    <div class="row">
+        Result:<span id='result'></span>
+    </div>
+
+</div>
+</body>
+</html>
