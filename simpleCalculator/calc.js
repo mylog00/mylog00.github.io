@@ -20,13 +20,20 @@ function calculate() {
     var rpn = document.getElementById('rpn');
     var result = document.getElementById('result');
     var trimmed_string = formula.value.replace(/\s+/g, '');//delete all white spaces
+    result.innerHTML = '';
+    rpn.innerHTML = '';
     if (trimmed_string) {
-        var token_list = parse(trimmed_string);
-        //console.log(token_list);
-        var rpn_list = reversPolishNotation(token_list);
-        rpn.innerHTML = rpn_list.join('');
-        var eval_res = evaluateRpn(rpn_list);
-        result.innerHTML = eval_res.toString();
+        if (!isValidString(trimmed_string)) {
+            result.innerHTML = 'Unknown character at string';
+        }
+        else {
+            var token_list = parse(trimmed_string);
+            //console.log(token_list);
+            var rpn_list = reversPolishNotation(token_list);
+            rpn.innerHTML = rpn_list.join('');
+            var eval_res = evaluateRpn(rpn_list);
+            result.innerHTML = eval_res.toString();
+        }
     } else {
         result.innerHTML = 'Empty string';
     }
@@ -119,4 +126,8 @@ function isOperation(char) {
 
 function isArrayEmpty(array) {
     return array === undefined || array.length <= 0
+}
+
+function isValidString(str) {
+    return /^[*/+\-0-9().]+$/.test(str);
 }
