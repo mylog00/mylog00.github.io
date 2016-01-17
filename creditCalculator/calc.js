@@ -4,7 +4,6 @@
 window.onload = restore;
 
 function calculate() {
-    console.log('strt calculate');
     //find elements by 'id'
     var amount = document.getElementById('amount');
     var apr = document.getElementById('apr');
@@ -16,11 +15,11 @@ function calculate() {
 
     //Get input data
     var principal = parseFloat(amount.value);
-    console.log('principal:' + principal);
+    log('principal:' + principal);
     var interest = parseFloat(apr.value) / 100 / 12;
-    console.log('interest:' + interest);
+    log('interest:' + interest);
     var payments = parseFloat(years.value) * 12;
-    console.log('payments:' + payments);
+    log('payments:' + payments);
 
     //Calculate monthly payment
     var x = Math.pow(1 + interest, payments);
@@ -35,12 +34,6 @@ function calculate() {
         totalinterest.innerHTML = ((monthly * payments) - principal).toFixed(2);
         //Save input data to local storage
         save(amount.value, apr.value, years.value, zipcode.value);
-        //
-        try {
-            getLenders(amount.value, apr.value, years.value, zipcode.value);
-        } catch (e) {
-            console.log('Error at function \'getLenders\'');
-        }
         //Draw graph
         chart(principal, interest, monthly, payments);
     } else {
@@ -63,6 +56,12 @@ function save(amount, apr, years, zipcode) {
 }
 //Restore data to local storage
 function restore() {
+    try {
+        getExchangeData();
+    } catch (e) {
+        log('Can not load foreign exchange data');
+    }
+
     if (window.localStorage && localStorage.loan_amount) {
         document.getElementById('amount').value = localStorage.loan_amount;
         document.getElementById('apr').value = localStorage.loan_apr;
@@ -71,9 +70,101 @@ function restore() {
     }
 }
 
-function getLenders(amount, apr, years, zipcode) {
-    console.log('I do smth. Yeah!');
-    //TODO
+function getExchangeData() {
+    // http://www.cbr.ru/scripts/XML_dynamic.asp?date_req1=13/01/2016&date_req2=14/01/2016&VAL_NM_RQ=R01235
+    var url = getYqlUrl();
+    var newScriptElement = document.createElement("script");
+    newScriptElement.setAttribute("src", url);
+    newScriptElement.setAttribute("id", "jsonp");
+
+    var head = document.getElementsByTagName("head")[0];
+    var oldScriptElement = document.getElementById("jsonp");
+    if (oldScriptElement === null) {
+        head.appendChild(newScriptElement);
+    }
+    else {
+        head.replaceChild(newScriptElement, oldScriptElement);
+    }
+}
+
+//used as JSONP callback
+function updateExchangeTable(object) {
+    var records = object.query.results.ValCurs.Record;
+    if (Array.isArray(records)) {
+        //fill table head
+        var tableHead = document.getElementsByTagName("thead")[0];
+        var row = createTableRow(['Value','Pair','Date'],true);
+        tableHead.appendChild(row);
+        //fill table body
+        records.reverse();
+        var tableBody = document.getElementsByTagName("tbody")[0];
+        for (var i = 0; i < records.length; i++) {
+            var rec = records[i];
+            var date = rec.Date;
+            var nominal = rec.Nominal;
+            var value = rec.Value.replace(',', '.');
+            value = parseFloat(value).toFixed(2);
+            log(date + ';' + nominal + ';' + rec.Value + ';' + value + ';');
+            row = createTableRow([value, 'USD/RUB', date], false);
+            tableBody.appendChild(row);
+        }
+    }
+
+    function createTableRow(valueList, isHeader) {
+        var row = document.createElement('tr');
+        if (Array.isArray(valueList)) {
+            for (var i = 0; i < valueList.length; i++) {
+                var col = createColumn(valueList[i], isHeader);
+                row.appendChild(col);
+            }
+        }
+        return row;
+
+        function createColumn(value, isHeader) {
+            var elem = isHeader ? 'th' : 'td';
+            var col = document.createElement(elem);
+            col.innerHTML = value;
+            return col;
+        }
+    }
+}
+
+function getYqlUrl() {
+    //Example:
+    //https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20xml%20where%20url%3D'www.cbr.ru%2Fscripts%2FXML_dynamic.asp%3Fdate_req1%3D02%2F03%2F2001%26date_req2%3D14%2F03%2F2001%26VAL_NM_RQ%3DR01235'&format=json&callback=callback
+    var yql_uri = 'https://query.yahooapis.com/v1/public/yql?q=';
+    yql_uri += getEncodedSelectQuery();
+    yql_uri += '&format=json&callback=updateExchangeTable';
+    log('url:' + yql_uri);
+    return yql_uri;
+}
+
+function getEncodedSelectQuery() {
+    var selectStr = 'select * from xml where url=\'' + getCbrUrl() + '\'';
+    return encodeURIComponent(selectStr);
+
+    function getCbrUrl() {
+        var usd_code = 'R01235';//USD
+        //var eur_code = 'R01239';//EUR
+        var date = new Date();//current date
+        var cur_date = formatDate(date);
+        date.setDate(date.getDate() - 7);//past date
+        var yestr_date = formatDate(date);
+        //Example:
+        //http://www.cbr.ru/scripts/XML_dynamic.asp?date_req1=13/01/2016&date_req2=14/01/2016&VAL_NM_RQ=R01235
+        var url = 'www.cbr.ru/scripts/XML_dynamic.asp?date_req1=' + yestr_date + '&date_req2=' + cur_date + '&VAL_NM_RQ=' + usd_code;
+        log('cbr url:' + url);
+        return url;
+    }
+
+    // format date to 'dd/mm/YYY'
+    function formatDate(date) {
+        function formatNum(num) {
+            if (num < 10) return '0' + num;
+            return String(num);
+        }
+        return formatNum(date.getDate()) + '/' + formatNum(date.getMonth() + 1) + '/' + date.getFullYear();
+    }
 }
 
 //Draw payment graph
@@ -114,8 +205,11 @@ function chart(principal, interest, monthly, payments) {
     var equity = 0;
     context.beginPath();
     context.moveTo(paymentToX(0), amountToY(0));
-    for (var i = 1; i <= payments; i++) {
-        var thisMonthsInterest = (principal - equity) * interest;
+
+    var thisMonthsInterest;
+    var i;
+    for (i = 1; i <= payments; i++) {
+        thisMonthsInterest = (principal - equity) * interest;
         equity += (monthly - thisMonthsInterest);
         context.lineTo(paymentToX(i), amountToY(equity));
     }
@@ -129,8 +223,8 @@ function chart(principal, interest, monthly, payments) {
     var bal = principal;
     context.beginPath();
     context.moveTo(paymentToX(0), amountToY(bal));
-    for (var i = 1; i <= payments; i++) {
-        var thisMonthsInterest = bal * interest;
+    for (i = 1; i <= payments; i++) {
+        thisMonthsInterest = bal * interest;
         bal -= (monthly - thisMonthsInterest);
         context.lineTo(paymentToX(i), amountToY(bal));
     }
@@ -156,9 +250,13 @@ function chart(principal, interest, monthly, payments) {
     context.textBaseline = 'middle';
     var ticks = [monthly * payments, principal];
     var rightEdge = paymentToX(payments);
-    for (var i = 0; i < ticks.length; i++) {
-        var y = amountToY(ticks[i]);
+    for (i = 0; i < ticks.length; i++) {
+        y = amountToY(ticks[i]);
         context.fillRect(rightEdge - 3, y - 0.5, 3, 1);
         context.fillText(String(ticks[i].toFixed(0)), rightEdge - 5, y);
     }
+}
+
+function log(str) {
+    console.log(str);
 }
